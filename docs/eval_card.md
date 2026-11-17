@@ -25,7 +25,7 @@ Card này đi kèm mỗi báo cáo và được dùng lại ở Day 10.
   Nguồn: `reports/baseline_v1.json`, `eval_fixed.json`, `eval_seeded_regression.json`.
 - **Judge:** tone_ok κ=0.757, P=0.857, R=0.800 (dùng); helpful bị loại vì recall 0.30 và κ 0.375 dưới ngưỡng. Chi tiết `docs/judge_audit.md`.
 - **Trace case:** `docs/trace_case.md` — `swarm C-002@55`, bước sai đầu tiên là event 3 `model_override` (FM-03); regression test `tests/test_lab9_trace_case.py`.
-- **Gate owner:** eval owner của nhóm (điền tên); khi gate exit 1 người này quyết định sửa hay xin waiver, ghi lý do vào PR.
+- **Gate owner:** Vũ Gia Linh (eval owner); khi gate exit 1 người này quyết định sửa hay xin waiver, ghi lý do vào PR.
 - **Phạm vi pilot:** yêu cầu hoàn phí giao hàng và hàng hỏng của khách một principal, một đơn mỗi claim; chạy với MockLLM.
 - **Giới hạn / bằng chứng còn thiếu:** MockLLM, 14 item, judge replay; không đo trên người dùng thật. Baseline swarm có 1 trial fail (C-002@55) nên pass_rate là 0.9857, không phải 1.0. Chỉ 5 seed nên lỗi xuất hiện 1/5 seed khó phát hiện ổn định. FM-01, 04, 06, 07 chưa có trace thật ở v1.
 - **Khi nào tăng eval-set version:** khi thêm item từ trace case hoặc từ gói adversarial (v2), hoặc khi đổi nhãn; mỗi lần phải chạy lại baseline và cập nhật sha.
