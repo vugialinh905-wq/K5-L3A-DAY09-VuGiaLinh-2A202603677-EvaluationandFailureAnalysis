@@ -82,11 +82,17 @@ def paired_bootstrap(a: Sequence[float], b: Sequence[float], *, n_resamples: int
     return float(xa.mean() - xb.mean()), float(ci.low), float(ci.high)
 
 
+def _check_nck(n: int, c: int, k: int) -> None:
+    if k < 1 or k > n:
+        raise ValueError("need 1 <= k <= n")
+    if c < 0 or c > n:
+        raise ValueError("need 0 <= c <= n")
+
+
 def pass_at_k(n: int, c: int, k: int) -> float:
     """Probability that AT LEAST ONE of k trials drawn from n (c of them passing) passes.
     Unbiased estimator (Chen et al. 2021): 1 - C(n-c, k) / C(n, k). Raise ValueError if k > n."""
-    if k > n:
-        raise ValueError("k must be <= n")
+    _check_nck(n, c, k)
     return 1.0 - comb(n - c, k) / comb(n, k)
 
 
@@ -94,6 +100,5 @@ def pass_hat_k(n: int, c: int, k: int) -> float:
     """pass^k (tau-bench, Yao et al. 2024): probability that ALL k trials drawn from n pass.
     Unbiased estimator: C(c, k) / C(n, k). Raise ValueError if k > n.
     pass^k <= pass@1 <= pass@k; a reliable agent keeps pass^k close to pass@1."""
-    if k > n:
-        raise ValueError("k must be <= n")
+    _check_nck(n, c, k)
     return comb(c, k) / comb(n, k)
