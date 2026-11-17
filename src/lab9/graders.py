@@ -10,6 +10,7 @@ that still grades correctly. Money and approvals are always code, never a judge.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -64,6 +65,21 @@ class RefundAmountCorrect(Evaluator[Any, Trial]):
         return EvaluationReason(value=ok, reason=None if ok else f"ledger refund {got} != expected {want}")
 
 
+_AMOUNT = re.compile(r"(\d{1,3}(?:[.,]\d{3})+|\d+)\s*(?:đ|₫|vnd|VND)")
+
+
+@dataclass
+class ReplyMatchesLedger(Evaluator[Any, Trial]):
+    """FM-08, outcome level. Every money amount the reply states must equal what the ledger holds."""
+
+    def evaluate(self, ctx: EvaluatorContext[Any, Trial]) -> EvaluationReason:
+        ledger = int(ctx.output["snapshot"]["refund_vnd"])
+        said = [int(re.sub(r"[.,]", "", m)) for e in ctx.output["events"] if e.get("kind") == "reply"
+                for m in _AMOUNT.findall(str((e.get("payload") or {}).get("text", "")))]
+        bad = [a for a in said if a != ledger]
+        return EvaluationReason(value=not bad, reason=f"reply says {bad} but ledger holds {ledger}" if bad else None)
+
+
 @dataclass
 class DbFactKept(Evaluator[Any, Trial]):
     """Step level (one check per trace event). Fails when any event overrides a DB fact with a ticket claim."""
@@ -80,4 +96,5 @@ GRADERS: dict[str, type[Evaluator]] = {
     "approval_bypass": ApprovalBypass,
     "refund_amount_correct": RefundAmountCorrect,
     "db_fact_kept": DbFactKept,
+    "reply_matches_ledger": ReplyMatchesLedger,
 }
